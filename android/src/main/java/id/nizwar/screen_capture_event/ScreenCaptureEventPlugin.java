@@ -173,14 +173,14 @@ public class ScreenCaptureEventPlugin implements FlutterPlugin, MethodCallHandle
                             fileObserver = new FileObserver(newFile) {
                                 @Override
                                 public void onEvent(int event, @Nullable String path) {
-                                    handleUpdateScreenRecordEvent(event, path);
+                                    handleUpdateScreenRecordEvent(event, newFile);
                                 }
                             };
                         } else {
                             fileObserver = new FileObserver(newFile.getPath()) {
                                 @Override
                                 public void onEvent(int event, @Nullable String path) {
-                                    handleUpdateScreenRecordEvent(event, path);
+                                    handleUpdateScreenRecordEvent(event, newFile);
                                 }
                             };
                         }
@@ -194,7 +194,7 @@ public class ScreenCaptureEventPlugin implements FlutterPlugin, MethodCallHandle
         }
     }
 
-    private void handleUpdateScreenRecordEvent(int event, String path) {
+    private void handleUpdateScreenRecordEvent(int event, File newFile) {
         long curSize = newFile.length();
         if (curSize > tempSize) {
             if (timeout != null) {

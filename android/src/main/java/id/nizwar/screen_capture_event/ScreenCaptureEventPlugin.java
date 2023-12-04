@@ -75,9 +75,7 @@ public class ScreenCaptureEventPlugin implements FlutterPlugin, MethodCallHandle
                 break;
             case "watch":
                 handler = new Handler(Looper.getMainLooper());
-                // updateScreenRecordStatus();
-
-                Log.d("version", "version is " + Build.VERSION.SDK_INT);
+                updateScreenRecordStatus();
 
                 if (Build.VERSION.SDK_INT >= 29) {
                     final List<File> files = new ArrayList<>();
@@ -112,31 +110,31 @@ public class ScreenCaptureEventPlugin implements FlutterPlugin, MethodCallHandle
                     };
                     fileObserver.startWatching();
                 } else {
-                    // for (final Path path : Path.values()) {
-                    //     fileObserver = new FileObserver(path.getPath()) {
-                    //         @Override
-                    //         public void onEvent(int event, final String filename) {
-                    //             File file = new File(path.getPath() + filename);
-                    //             if (event == FileObserver.CREATE) {
-                    //                 if (file.exists()) {
-                    //                     String mime = getMimeType(file.getPath());
-                    //                     if (mime != null) {
-                    //                         if (mime.contains("video")) {
-                    //                             stopAllRecordWatcher();
-                    //                             setScreenRecordStatus(true);
-                    //                             updateScreenRecordStatus();
-                    //                         } else if (mime.contains("image")) {
-                    //                             handler.post(() -> {
-                    //                                 channel.invokeMethod("screenshot", file.getPath());
-                    //                             });
-                    //                         }
-                    //                     }
-                    //                 }
-                    //             }
-                    //         }
-                    //     };
-                    //     fileObserver.startWatching();
-                    // }
+                    for (final Path path : Path.values()) {
+                        fileObserver = new FileObserver(path.getPath()) {
+                            @Override
+                            public void onEvent(int event, final String filename) {
+                                File file = new File(path.getPath() + filename);
+                                if (event == FileObserver.CREATE) {
+                                    if (file.exists()) {
+                                        String mime = getMimeType(file.getPath());
+                                        if (mime != null) {
+                                            if (mime.contains("video")) {
+                                                stopAllRecordWatcher();
+                                                setScreenRecordStatus(true);
+                                                updateScreenRecordStatus();
+                                            } else if (mime.contains("image")) {
+                                                handler.post(() -> {
+                                                    channel.invokeMethod("screenshot", file.getPath());
+                                                });
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        };
+                        fileObserver.startWatching();
+                    }
                 }
                 break;
             case "dispose":
@@ -145,9 +143,6 @@ public class ScreenCaptureEventPlugin implements FlutterPlugin, MethodCallHandle
                     stringObjectEntry.getValue().stopWatching();
                 }
                 watchModifier.clear();
-                break;
-            case "testPath":
-                result.success(Path.values());
                 break;
             default:
         }
@@ -173,34 +168,39 @@ public class ScreenCaptureEventPlugin implements FlutterPlugin, MethodCallHandle
                 String mime = getMimeType(newFile.getPath());
                 if (mime != null) {
                     if (mime.contains("video") && !watchModifier.containsKey(newFile.getPath())) {
-                        watchModifier.put(newFile.getPath(), new FileObserver(newFile) {
-                            @Override
-                            public void onEvent(int event, @Nullable String path) {
-                                long curSize = newFile.length();
-                                if (curSize > tempSize) {
-                                    if (timeout != null) {
-                                        try {
-                                            timeout.cancel();
-                                            timeout = null;
-                                        } catch (Exception ignored) {
-                                        }
-                                    }
-                                    setScreenRecordStatus(event == FileObserver.MODIFY);
-                                    tempSize = newFile.length();
-                                }
-                                if (timeout == null) {
-                                    timeout = new Timer();
-                                    timeout.schedule(new TimerTask() {
-                                        @Override
-                                        public void run() {
-                                            if (watchModifier.containsKey(newFile.getPath())) {
-                                                setScreenRecordStatus(curSize != tempSize);
+                        if (Build.VERSION.SDK_INT >= 29) {
+                            watchModifier.put(newFile.getPath(), new FileObserver(newFile) {
+                                @Override
+                                public void onEvent(int event, @Nullable String path) {
+                                    long curSize = newFile.length();
+                                    if (curSize > tempSize) {
+                                        if (timeout != null) {
+                                            try {
+                                                timeout.cancel();
+                                                timeout = null;
+                                            } catch (Exception ignored) {
                                             }
                                         }
-                                    }, 1500);
+                                        setScreenRecordStatus(event == FileObserver.MODIFY);
+                                        tempSize = newFile.length();
+                                    }
+                                    if (timeout == null) {
+                                        timeout = new Timer();
+                                        timeout.schedule(new TimerTask() {
+                                            @Override
+                                            public void run() {
+                                                if (watchModifier.containsKey(newFile.getPath())) {
+                                                    setScreenRecordStatus(curSize != tempSize);
+                                                }
+                                            }
+                                        }, 1500);
+                                    }
                                 }
-                            }
-                        });
+                            });
+                        } else {
+                            Log.d("no such wwwwww", "no such wwwwww : " + Build.VERSION.SDK_INT);
+                        }
+
                         FileObserver watch = watchModifier.get(newFile.getPath());
                         if (watch != null) watch.startWatching();
                     }

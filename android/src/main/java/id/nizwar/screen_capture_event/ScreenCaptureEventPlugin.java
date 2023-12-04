@@ -31,6 +31,8 @@ import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
 
+import android.util.Log;
+
 /**
  * ScreenCaptureEventPlugin
  */
@@ -75,6 +77,8 @@ public class ScreenCaptureEventPlugin implements FlutterPlugin, MethodCallHandle
                 handler = new Handler(Looper.getMainLooper());
                 updateScreenRecordStatus();
 
+                Log.d("version", "version is " + Build.VERSION.SDK_INT);
+
                 if (Build.VERSION.SDK_INT >= 29) {
                     final List<File> files = new ArrayList<>();
                     final List<String> paths = new ArrayList<>();
@@ -108,31 +112,31 @@ public class ScreenCaptureEventPlugin implements FlutterPlugin, MethodCallHandle
                     };
                     fileObserver.startWatching();
                 } else {
-                    for (final Path path : Path.values()) {
-                        // fileObserver = new FileObserver(path.getPath()) {
-                        //     @Override
-                        //     public void onEvent(int event, final String filename) {
-                        //         File file = new File(path.getPath() + filename);
-                        //         if (event == FileObserver.CREATE) {
-                        //             if (file.exists()) {
-                        //                 String mime = getMimeType(file.getPath());
-                        //                 if (mime != null) {
-                        //                     if (mime.contains("video")) {
-                        //                         stopAllRecordWatcher();
-                        //                         setScreenRecordStatus(true);
-                        //                         updateScreenRecordStatus();
-                        //                     } else if (mime.contains("image")) {
-                        //                         handler.post(() -> {
-                        //                             channel.invokeMethod("screenshot", file.getPath());
-                        //                         });
-                        //                     }
-                        //                 }
-                        //             }
-                        //         }
-                        //     }
-                        // };
-                        // fileObserver.startWatching();
-                    }
+                    // for (final Path path : Path.values()) {
+                    //     fileObserver = new FileObserver(path.getPath()) {
+                    //         @Override
+                    //         public void onEvent(int event, final String filename) {
+                    //             File file = new File(path.getPath() + filename);
+                    //             if (event == FileObserver.CREATE) {
+                    //                 if (file.exists()) {
+                    //                     String mime = getMimeType(file.getPath());
+                    //                     if (mime != null) {
+                    //                         if (mime.contains("video")) {
+                    //                             stopAllRecordWatcher();
+                    //                             setScreenRecordStatus(true);
+                    //                             updateScreenRecordStatus();
+                    //                         } else if (mime.contains("image")) {
+                    //                             handler.post(() -> {
+                    //                                 channel.invokeMethod("screenshot", file.getPath());
+                    //                             });
+                    //                         }
+                    //                     }
+                    //                 }
+                    //             }
+                    //         }
+                    //     };
+                    //     fileObserver.startWatching();
+                    // }
                 }
                 break;
             case "dispose":

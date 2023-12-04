@@ -62,7 +62,7 @@ class ScreenCaptureEvent {
   }
 
   Future<List<String>> testPath() {
-    return _channel.invokeMethod("testPath");
+    return _channel.invokeMethod("testPath").then((value) => value ?? []);
   }
 
   ///You can get record status to check if screenrecord still active

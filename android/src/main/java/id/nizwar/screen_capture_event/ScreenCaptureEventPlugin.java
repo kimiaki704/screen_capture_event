@@ -75,7 +75,7 @@ public class ScreenCaptureEventPlugin implements FlutterPlugin, MethodCallHandle
                 break;
             case "watch":
                 handler = new Handler(Looper.getMainLooper());
-                updateScreenRecordStatus();
+                // updateScreenRecordStatus();
 
                 Log.d("version", "version is " + Build.VERSION.SDK_INT);
 

@@ -109,29 +109,29 @@ public class ScreenCaptureEventPlugin implements FlutterPlugin, MethodCallHandle
                     fileObserver.startWatching();
                 } else {
                     for (final Path path : Path.values()) {
-                        fileObserver = new FileObserver(path.getPath()) {
-                            @Override
-                            public void onEvent(int event, final String filename) {
-                                File file = new File(path.getPath() + filename);
-                                if (event == FileObserver.CREATE) {
-                                    if (file.exists()) {
-                                        String mime = getMimeType(file.getPath());
-                                        if (mime != null) {
-                                            if (mime.contains("video")) {
-                                                stopAllRecordWatcher();
-                                                setScreenRecordStatus(true);
-                                                updateScreenRecordStatus();
-                                            } else if (mime.contains("image")) {
-                                                handler.post(() -> {
-                                                    channel.invokeMethod("screenshot", file.getPath());
-                                                });
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        };
-                        fileObserver.startWatching();
+                        // fileObserver = new FileObserver(path.getPath()) {
+                        //     @Override
+                        //     public void onEvent(int event, final String filename) {
+                        //         File file = new File(path.getPath() + filename);
+                        //         if (event == FileObserver.CREATE) {
+                        //             if (file.exists()) {
+                        //                 String mime = getMimeType(file.getPath());
+                        //                 if (mime != null) {
+                        //                     if (mime.contains("video")) {
+                        //                         stopAllRecordWatcher();
+                        //                         setScreenRecordStatus(true);
+                        //                         updateScreenRecordStatus();
+                        //                     } else if (mime.contains("image")) {
+                        //                         handler.post(() -> {
+                        //                             channel.invokeMethod("screenshot", file.getPath());
+                        //                         });
+                        //                     }
+                        //                 }
+                        //             }
+                        //         }
+                        //     }
+                        // };
+                        // fileObserver.startWatching();
                     }
                 }
                 break;
@@ -141,6 +141,9 @@ public class ScreenCaptureEventPlugin implements FlutterPlugin, MethodCallHandle
                     stringObjectEntry.getValue().stopWatching();
                 }
                 watchModifier.clear();
+                break;
+            case "testPath":
+                result.success(Path.values());
                 break;
             default:
         }
@@ -266,7 +269,7 @@ public class ScreenCaptureEventPlugin implements FlutterPlugin, MethodCallHandle
     }
 
     public enum Path {
-        // DCIM(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + File.separator + "Screenshots" + File.separator),
+        DCIM(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM) + File.separator + "Screenshots" + File.separator),
         PICTURES(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + File.separator + "Screenshots" + File.separator);
 
         final private String path;

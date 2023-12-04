@@ -168,43 +168,54 @@ public class ScreenCaptureEventPlugin implements FlutterPlugin, MethodCallHandle
                 String mime = getMimeType(newFile.getPath());
                 if (mime != null) {
                     if (mime.contains("video") && !watchModifier.containsKey(newFile.getPath())) {
-                        if (Build.VERSION.SDK_INT >= 29) {
-                            watchModifier.put(newFile.getPath(), new FileObserver(newFile) {
+                        FileObserver fileObserver;
+                        if (android.os.Build.VERSION.SDK_INT >= 29) {
+                            fileObserver = new FileObserver(newFile) {
                                 @Override
                                 public void onEvent(int event, @Nullable String path) {
-                                    long curSize = newFile.length();
-                                    if (curSize > tempSize) {
-                                        if (timeout != null) {
-                                            try {
-                                                timeout.cancel();
-                                                timeout = null;
-                                            } catch (Exception ignored) {
-                                            }
-                                        }
-                                        setScreenRecordStatus(event == FileObserver.MODIFY);
-                                        tempSize = newFile.length();
-                                    }
-                                    if (timeout == null) {
-                                        timeout = new Timer();
-                                        timeout.schedule(new TimerTask() {
-                                            @Override
-                                            public void run() {
-                                                if (watchModifier.containsKey(newFile.getPath())) {
-                                                    setScreenRecordStatus(curSize != tempSize);
-                                                }
-                                            }
-                                        }, 1500);
-                                    }
+                                    handleEvent(event, path);
                                 }
-                            });
+                            };
                         } else {
-                            Log.d("no such wwwwww", "no such wwwwww : " + Build.VERSION.SDK_INT);
+                            fileObserver = new FileObserver(newFile.getPath()) {
+                                @Override
+                                public void onEvent(int event, @Nullable String path) {
+                                    handleEvent(event, path);
+                                }
+                            };
                         }
+                        watchModifier.put(newFile.getPath(), fileObserver);
 
                         FileObserver watch = watchModifier.get(newFile.getPath());
                         if (watch != null) watch.startWatching();
                     }
                 }
+            }
+        }
+
+        private void handleEvent(int event, String path) {
+            long curSize = newFile.length();
+            if (curSize > tempSize) {
+                if (timeout != null) {
+                    try { 
+                        timeout.cancel(); 
+                        timeout = null;
+                    } catch (Exception ignored) {
+                    }
+                }
+                setScreenRecordStatus(event == FileObserver.MODIFY);
+                tempSize = newFile.length();
+            }
+            if (timeout == null) {
+                timeout = new Timer();
+                timeout.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        if (watchModifier.containsKey(newFile.getPath())) {
+                            setScreenRecordStatus(curSize != tempSize);
+                        }
+                    }
+                }, 1500);
             }
         }
     }

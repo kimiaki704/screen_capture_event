@@ -173,14 +173,14 @@ public class ScreenCaptureEventPlugin implements FlutterPlugin, MethodCallHandle
                             fileObserver = new FileObserver(newFile) {
                                 @Override
                                 public void onEvent(int event, @Nullable String path) {
-                                    handleEvent(event, path);
+                                    handleUpdateScreenRecordEvent(event, path);
                                 }
                             };
                         } else {
                             fileObserver = new FileObserver(newFile.getPath()) {
                                 @Override
                                 public void onEvent(int event, @Nullable String path) {
-                                    handleEvent(event, path);
+                                    handleUpdateScreenRecordEvent(event, path);
                                 }
                             };
                         }
@@ -192,31 +192,31 @@ public class ScreenCaptureEventPlugin implements FlutterPlugin, MethodCallHandle
                 }
             }
         }
+    }
 
-        private void handleEvent(int event, String path) {
-            long curSize = newFile.length();
-            if (curSize > tempSize) {
-                if (timeout != null) {
-                    try { 
-                        timeout.cancel(); 
-                        timeout = null;
-                    } catch (Exception ignored) {
+    private void handleUpdateScreenRecordEvent(int event, String path) {
+        long curSize = newFile.length();
+        if (curSize > tempSize) {
+            if (timeout != null) {
+                try { 
+                    timeout.cancel(); 
+                    timeout = null;
+                } catch (Exception ignored) {
+                }
+            }
+            setScreenRecordStatus(event == FileObserver.MODIFY);
+            tempSize = newFile.length();
+        }
+        if (timeout == null) {
+            timeout = new Timer();
+            timeout.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    if (watchModifier.containsKey(newFile.getPath())) {
+                        setScreenRecordStatus(curSize != tempSize);
                     }
                 }
-                setScreenRecordStatus(event == FileObserver.MODIFY);
-                tempSize = newFile.length();
-            }
-            if (timeout == null) {
-                timeout = new Timer();
-                timeout.schedule(new TimerTask() {
-                    @Override
-                    public void run() {
-                        if (watchModifier.containsKey(newFile.getPath())) {
-                            setScreenRecordStatus(curSize != tempSize);
-                        }
-                    }
-                }, 1500);
-            }
+            }, 1500);
         }
     }
 

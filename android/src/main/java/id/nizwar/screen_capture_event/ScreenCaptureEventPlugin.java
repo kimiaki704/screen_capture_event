@@ -141,7 +141,7 @@ public class ScreenCaptureEventPlugin implements FlutterPlugin, MethodCallHandle
                         setScreenRecordStatus(curSize != tempSize);
                     }
                 }
-            }, 1500);
+            }, 1600);
         }
     }
     private void handleNewFileCreated(@Nullable Uri uri) {

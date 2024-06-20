@@ -29,6 +29,7 @@ import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
 import android.util.Log;
+import android.database.Cursor;
 
 /**
  * ScreenCaptureEventPlugin
@@ -141,7 +142,7 @@ public class ScreenCaptureEventPlugin implements FlutterPlugin, MethodCallHandle
                         setScreenRecordStatus(curSize != tempSize);
                     }
                 }
-            }, 1600);
+            }, 1500);
         }
     }
     private void handleNewFileCreated(@Nullable Uri uri) {
